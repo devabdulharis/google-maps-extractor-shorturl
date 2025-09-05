@@ -1,5 +1,7 @@
 const express = require("express");
 const axios = require("axios");
+const swaggerUi = require("swagger-ui-express");
+const swaggerJsdoc = require("swagger-jsdoc");
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -66,6 +68,67 @@ app.get("/api/resolve", async (req, res) => {
   }
 });
 
+/* =============================
+   Swagger Setup
+============================= */
+const swaggerOptions = {
+  definition: {
+    openapi: "3.0.3",
+    info: {
+      title: "Google Maps Resolver API",
+      version: "1.0.0",
+      description:
+        "API sederhana untuk extract latitude & longitude dari link Google Maps (shortlink `maps.app.goo.gl` / `goo.gl/maps` maupun link langsung `@lat,long`, `?q=lat,long`, `!3dlat!4dlong`).",
+    },
+    servers: [
+      {
+        url: `http://localhost:${PORT}`,
+      },
+    ],
+  },
+  apis: ["./server.js"], // baca JSDoc di file ini
+};
+
+const swaggerSpec = swaggerJsdoc(swaggerOptions);
+app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
+
+/**
+ * @openapi
+ * /api/resolve:
+ *   get:
+ *     summary: Resolve Google Maps URL
+ *     description: Ambil koordinat (latitude & longitude) dari link Google Maps.
+ *     parameters:
+ *       - in: query
+ *         name: url
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Google Maps link untuk di-resolve.
+ *         example: https://www.google.com/maps/@-6.200000,106.816666,15z
+ *     responses:
+ *       200:
+ *         description: Koordinat berhasil ditemukan
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 lat:
+ *                   type: number
+ *                   example: -6.2
+ *                 lng:
+ *                   type: number
+ *                   example: 106.816666
+ *       400:
+ *         description: Parameter URL tidak diberikan
+ *       404:
+ *         description: Koordinat tidak ditemukan
+ *       500:
+ *         description: Error server
+ */
+
 app.listen(PORT, () => {
   console.log(`API running at http://localhost:${PORT}`);
+  console.log(`Swagger docs available at http://localhost:${PORT}/api-docs`);
 });
