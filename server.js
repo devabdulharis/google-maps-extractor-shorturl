@@ -90,6 +90,37 @@ app.use(
 // ====================================================
 // Endpoint utama
 // ====================================================
+/**
+ * @openapi
+ * /api/resolve:
+ *   get:
+ *     summary: Resolve Google Maps URL
+ *     description: Ambil latitude, longitude & nama tempat dari link Google Maps
+ *     parameters:
+ *       - in: query
+ *         name: url
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Google Maps link
+ *     responses:
+ *       200:
+ *         description: Data berhasil ditemukan
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 lat:
+ *                   type: number
+ *                   example: -6.2
+ *                 lng:
+ *                   type: number
+ *                   example: 106.816
+ *                 name:
+ *                   type: string
+ *                   example: "Kantor Desa Gumulung Lebak"
+ */
 app.get("/api/resolve", async (req, res) => {
   const { url } = req.query;
   if (!url) return res.status(400).json({ error: "Missing url parameter" });
