@@ -59,6 +59,36 @@ app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 // ====================================================
 // Endpoint utama
 // ====================================================
+/**
+ * @openapi
+ * /api/resolve:
+ *   get:
+ *     summary: Resolve Google Maps URL
+ *     description: Ambil latitude & longitude dari link Google Maps
+ *     parameters:
+ *       - in: query
+ *         name: url
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Google Maps link
+ *     responses:
+ *       200:
+ *         description: Koordinat berhasil ditemukan
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 lat:
+ *                   type: number
+ *                   example: -6.2
+ *                 lng:
+ *                   type: number
+ *                   example: 106.816
+ *       400:
+ *         description: Missing url parameter
+ */
 app.get("/api/resolve", async (req, res) => {
   const { url } = req.query;
   if (!url) {
