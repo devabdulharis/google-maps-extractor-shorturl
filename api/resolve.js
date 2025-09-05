@@ -28,8 +28,10 @@ function extractPlaceInfoFromHtml(html) {
   const info = {};
 
   // Ambil <meta content="..." property="og:title">
-  let match = html.match(/<meta\s+content="([^"]+)"\s+property="og:title">/);
-  if (match) info.name = match[1];
+  let match = html.match(/<title>([^<]+)<\/title>/i);
+  if (match) {
+    info.name = match[1].replace(/\s*-\s*Google Maps\s*$/i, "");
+  }
 
   // Ambil <meta content="..." property="og:description">
   match = html.match(/<meta\s+content="([^"]+)"\s+property="og:description">/);
