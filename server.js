@@ -32,11 +32,9 @@ function extractLatLngFromUrl(url) {
 function extractPlaceInfoFromHtml(html) {
   const info = {};
 
-  let match = html.match(/<title>([^<]+)<\/title>/i);
-  if (match) {
-    // hapus suffix ' - Google Maps'
-    info.name = match[1].trim();
-  }
+  // Ambil <meta content="..." property="og:title"> 
+  let match = html.match(/<meta\s+content="([^"]+)"\s+property="og:title">/); 
+  if (match) info.name = match[1];
 
   // Ambil <meta content="..." property="og:description">
   match = html.match(/<meta\s+content="([^"]+)"\s+property="og:description">/);
