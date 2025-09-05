@@ -28,7 +28,7 @@ function extractLatLngFromUrl(url) {
 
 function extractLatLngFromHtml(html) {
   const regex =
-    /window\.APP_INITIALIZATION_STATE=\[\[\[\d+.\d+,(-?\d+\.\d+),(-?\d+\.\d+)/;
+    /window\.APP_INITIALIZATION_STATE=\[\[\[\d+,\d+,".*?",(-?\d+\.\d+),(-?\d+\.\d+)/;
   const match = html.match(regex);
   if (match) {
     return { lat: parseFloat(match[1]), lng: parseFloat(match[2]) };
@@ -49,25 +49,14 @@ const swaggerOptions = {
     },
     servers: [{ url: "https://google-maps-extractor-shorturl.vercel.app" }],
   },
-  apis: ["./server.js"], // atau path absolute (lebih aman di Vercel)
+  apis: [new URL("./server.js", import.meta.url).pathname],
 };
 
 const swaggerSpec = swaggerJsdoc(swaggerOptions);
 
-// Swagger route (otomatis handle bundle.js, css, dll)
-app.use(
-  "/api-docs",
-  swaggerUi.serve,
-  swaggerUi.setup(swaggerSpec, {
-    customCssUrl: [
-      "https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/4.15.5/swagger-ui.css"
-    ],
-    customJs: [
-      "https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/4.15.5/swagger-ui-bundle.js",
-      "https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/4.15.5/swagger-ui-standalone-preset.js"
-    ]
-  })
-);
+// Swagger route
+app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
+
 // ====================================================
 // Endpoint utama
 // ====================================================
@@ -108,18 +97,34 @@ app.get("/api/resolve", async (req, res) => {
   }
 
   try {
-    // coba parse langsung dari URL
-    const coords = extractLatLngFromUrl(url);
-    if (coords) return res.status(200).json(coords);
+    // 1️⃣ coba parse langsung dari URL
+    let coords = extractLatLngFromUrl(url);
+    if (coords) return res.json(coords);
 
-    // kalau gagal → fetch HTML (untuk shortlink gmaps)
-    const response = await axios.get(url);
-    const coordsFromHtml = extractLatLngFromHtml(response.data);
-    if (!coordsFromHtml) {
+    // 2️⃣ cek apakah shortlink → resolve redirect
+    let finalUrl = url;
+    if (/goo\.gl|maps\.app\.goo\.gl/.test(url)) {
+      const r = await axios.get(url, {
+        maxRedirects: 0,
+        validateStatus: (s) => s >= 200 && s < 400,
+      });
+      if (r.headers.location) {
+        finalUrl = r.headers.location;
+      }
+    }
+
+    // 3️⃣ coba parse dari URL hasil redirect
+    coords = extractLatLngFromUrl(finalUrl);
+    if (coords) return res.json(coords);
+
+    // 4️⃣ terakhir fetch HTML
+    const response = await axios.get(finalUrl);
+    coords = extractLatLngFromHtml(response.data);
+    if (!coords) {
       return res.status(404).json({ error: "Coordinates not found" });
     }
 
-    res.status(200).json(coordsFromHtml);
+    res.json(coords);
   } catch (err) {
     console.error(err.message);
     res.status(500).json({ error: "Failed to resolve URL" });
