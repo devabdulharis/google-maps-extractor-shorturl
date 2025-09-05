@@ -32,21 +32,28 @@ function extractLatLngFromUrl(url) {
 function extractPlaceInfoFromHtml(html) {
   const info = {};
 
-  // Nama tempat
-  let match = html.match(/<meta content="(.*?)" property="og:title">/);
+  // Ambil <meta content="..." property="og:title">
+  let match = html.match(/<meta\s+content="([^"]+)"\s+property="og:title">/);
   if (match) info.name = match[1];
 
-  // Deskripsi / kategori
-  match = html.match(/<meta content="(.*?)" property="og:description">/);
+  // Ambil <meta content="..." property="og:description">
+  match = html.match(/<meta\s+content="([^"]+)"\s+property="og:description">/);
   if (match) info.description = match[1];
 
-  // Alamat lengkap
-  match = html.match(/<meta content="(.*?)" itemprop="name">/);
+  // Ambil <meta content="..." itemprop="name">
+  match = html.match(/<meta\s+content="([^"]+)"\s+itemprop="name">/);
   if (match) info.full_address = match[1];
 
-  // Gambar thumbnail
-  match = html.match(/<meta content="(.*?)" property="og:image">/);
+  // Ambil <meta content="..." property="og:image">
+  match = html.match(/<meta\s+content="([^"]+)"\s+property="og:image">/);
   if (match) info.image = match[1];
+
+  // Ambil rating + kategori (contoh: ★★★★☆ · Corporate office)
+  match = html.match(/<meta\s+content="(★+☆?) · (.*?)"\s+itemprop="description">/);
+  if (match) {
+    info.rating = match[1];
+    info.category = match[2];
+  }
 
   return info;
 }
@@ -145,12 +152,6 @@ app.get("/api/resolve", async (req, res) => {
       }
     }
 
-    // coba extract koordinat langsung dari URL
-    // let coords = extractLatLngFromUrl(finalUrl);
-    // if (coords) {
-    //   return res.json({ ...coords, name: null });
-    // }
-
     // fetch HTML dari Google Maps
     const r = await axios.get(finalUrl, {
       maxRedirects: 3,
@@ -161,14 +162,24 @@ app.get("/api/resolve", async (req, res) => {
       timeout: 8000,
     });
 
+    // extract koordinat dari URL atau HTML
+    let coords = extractLatLngFromUrl(finalUrl);
+    if (!coords) {
+      coords = extractLatLngFromHtml(r.data);
+    }
+
+    // extract informasi tempat
     const info = extractPlaceInfoFromHtml(r.data);
-    return res.json({ ...info });
+
+    return res.json({
+      ...coords,
+      ...info,
+    });
   } catch (err) {
     console.error("Resolve error:", err.message);
     res.status(500).json({ error: "Failed to resolve URL" });
   }
 });
-
 // ====================================================
 // Export untuk Vercel
 // ====================================================
