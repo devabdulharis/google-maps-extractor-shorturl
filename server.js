@@ -11,16 +11,16 @@ const app = express();
 function extractLatLngFromUrl(url) {
   let match;
 
-  // @lat,lng
+  // 1️⃣ Cari pinpoint dulu: !3dlat!4dlong
+  match = url.match(/!3d(-?\d+\.\d+)!4d(-?\d+\.\d+)/);
+  if (match) return { lat: parseFloat(match[1]), lng: parseFloat(match[2]) };
+
+  // 2️⃣ Kalau nggak ada, cek @lat,lng (viewport)
   match = url.match(/@(-?\d+\.\d+),(-?\d+\.\d+)/);
   if (match) return { lat: parseFloat(match[1]), lng: parseFloat(match[2]) };
 
-  // ?q=lat,lng
+  // 3️⃣ Kalau nggak ada juga, cek query ?q=lat,lng
   match = url.match(/[?&]q=(-?\d+\.\d+),(-?\d+\.\d+)/);
-  if (match) return { lat: parseFloat(match[1]), lng: parseFloat(match[2]) };
-
-  // !3dlat!4dlong
-  match = url.match(/!3d(-?\d+\.\d+)!4d(-?\d+\.\d+)/);
   if (match) return { lat: parseFloat(match[1]), lng: parseFloat(match[2]) };
 
   return null;
