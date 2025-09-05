@@ -1,28 +1,13 @@
 {
-  "name": "gmaps-resolver-api",
+  "name": "gmaps-resolver",
   "version": "1.0.0",
-  "description": "Simple API to resolve Google Maps short links and extract latitude/longitude.",
   "main": "server.js",
-  "scripts": {
-    "start": "node server.js",
-    "dev": "nodemon server.js"
-  },
-  "keywords": [
-    "google-maps",
-    "latitude",
-    "longitude",
-    "express",
-    "api"
-  ],
-  "author": "Abdul Haris",
-  "license": "MIT",
+  "type": "module",
+  "author" : "Abdul Haris",
   "dependencies": {
     "axios": "^1.7.0",
-    "express": "^4.19.2",
+    "express": "^4.19.0",
     "swagger-jsdoc": "^6.2.8",
-    "swagger-ui-express": "^5.0.1"
-  },
-  "devDependencies": {
-    "nodemon": "^3.1.0"
+    "swagger-ui-express": "^4.7.1"
   }
 }
