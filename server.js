@@ -1,9 +1,7 @@
 import express from "express";
-import axios from "axios";
 import swaggerUi from "swagger-ui-express";
 import swaggerJsdoc from "swagger-jsdoc";
-import path from "path";
-import { fileURLToPath } from "url";
+import axios from "axios";
 
 const app = express();
 
@@ -41,26 +39,23 @@ function extractLatLngFromHtml(html) {
 // ====================================================
 // Swagger Setup
 // ====================================================
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-
 const swaggerOptions = {
   definition: {
     openapi: "3.0.3",
     info: {
       title: "Google Maps Resolver API",
       version: "1.0.0",
-      description:
-        "API untuk extract latitude & longitude dari link Google Maps (shortlink & direct link).",
+      description: "API untuk extract latitude & longitude dari link Google Maps",
     },
     servers: [{ url: "https://google-maps-extractor-shorturl.vercel.app" }],
   },
-  apis: [path.join(__dirname, "./server.js")], // aman untuk vercel
+  apis: ["./server.js"], // atau path absolute (lebih aman di Vercel)
 };
-const swaggerSpec = swaggerJsdoc(swaggerOptions);
-console.log(JSON.stringify(swaggerSpec, null, 2));
-app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
+const swaggerSpec = swaggerJsdoc(swaggerOptions);
+
+// Swagger route (otomatis handle bundle.js, css, dll)
+app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 // ====================================================
 // Endpoint utama
 // ====================================================
