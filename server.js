@@ -40,22 +40,23 @@ function extractLatLngFromHtml(html) {
 // Swagger Setup
 // ====================================================
 const swaggerOptions = {
-  definition: {
-    openapi: "3.0.3",
-    info: {
-      title: "Google Maps Resolver API",
-      version: "1.0.0",
-      description: "API untuk extract latitude & longitude dari link Google Maps",
-    },
-    servers: [{ url: "https://google-maps-extractor-shorturl.vercel.app" }],
-  },
-  apis: [new URL("./server.js", import.meta.url).pathname],
-};
-
-const swaggerSpec = swaggerJsdoc(swaggerOptions);
+        definition: {
+            openapi: "3.0.3",
+            info: {
+                title: "Google Maps Resolver API",
+                version: "1.0.0",
+                description: "API untuk extract latitude & longitude dari link Google Maps",
+            },
+            servers: [{
+                url: "https://google-maps-extractor-shorturl.vercel.app"
+            }],
+        },
+        apis: ["./server.js"], // atau path absolute (lebih aman di Vercel) }; 
+  const swaggerSpec = swaggerJsdoc(swaggerOptions); // Swagger route (otomatis handle bundle.js, css, dll) 
+app.use( "/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec, { customCssUrl: [ "https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/4.15.5/swagger-ui.css" ], customJs: [ "https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/4.15.5/swagger-ui-bundle.js", "https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/4.15.5/swagger-ui-standalone-preset.js" ] }) );
 
 // Swagger route
-app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
+
 
 // ====================================================
 // Endpoint utama
