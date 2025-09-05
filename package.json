@@ -8,6 +8,6 @@
     "axios": "^1.7.0",
     "express": "^4.19.0",
     "swagger-jsdoc": "^6.2.8",
-    "swagger-ui-express": "^4.7.1"
+    "swagger-ui-express": "^5.0.2"
   }
 }
