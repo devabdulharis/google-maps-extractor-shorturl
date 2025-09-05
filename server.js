@@ -41,6 +41,18 @@ function extractLatLngFromHtml(html) {
 
   return null;
 }
+
+// ====================================================
+// Fungsi helper untuk extract nama tempat / alamat
+// ====================================================
+function extractPlaceNameFromHtml(html) {
+  const match = html.match(/<title>(.*?)· Google Maps<\/title>/);
+  if (match) {
+    return match[1].trim();
+  }
+  return null;
+}
+
 // ====================================================
 // Swagger Setup
 // ====================================================
@@ -50,8 +62,7 @@ const swaggerOptions = {
     info: {
       title: "Google Maps Resolver API",
       version: "1.0.0",
-      description:
-        "API untuk extract latitude & longitude dari link Google Maps",
+      description: "API untuk extract latitude, longitude & nama tempat dari link Google Maps",
     },
     servers: [
       {
@@ -59,7 +70,7 @@ const swaggerOptions = {
       },
     ],
   },
-  apis: ["./server.js"], // pakai path absolute di Vercel kalau perlu
+  apis: ["./server.js"],
 };
 
 const swaggerSpec = swaggerJsdoc(swaggerOptions);
@@ -86,7 +97,7 @@ app.use(
  * /api/resolve:
  *   get:
  *     summary: Resolve Google Maps URL
- *     description: Ambil latitude & longitude dari link Google Maps
+ *     description: Ambil latitude, longitude & nama tempat dari link Google Maps
  *     parameters:
  *       - in: query
  *         name: url
@@ -96,7 +107,7 @@ app.use(
  *         description: Google Maps link
  *     responses:
  *       200:
- *         description: Koordinat berhasil ditemukan
+ *         description: Data berhasil ditemukan
  *         content:
  *           application/json:
  *             schema:
@@ -108,8 +119,9 @@ app.use(
  *                 lng:
  *                   type: number
  *                   example: 106.816
- *       400:
- *         description: Missing url parameter
+ *                 name:
+ *                   type: string
+ *                   example: "Kantor Desa Gumulung Lebak"
  */
 app.get("/api/resolve", async (req, res) => {
   const { url } = req.query;
@@ -118,11 +130,11 @@ app.get("/api/resolve", async (req, res) => {
   }
 
   try {
-    // 1️⃣ coba parse langsung dari URL
     let coords = extractLatLngFromUrl(url);
-    if (coords) return res.json(coords);
+    if (coords) {
+      return res.json({ ...coords, name: null });
+    }
 
-    // 2️⃣ cek apakah shortlink → resolve redirect
     let finalUrl = url;
     if (/goo\.gl|maps\.app\.goo\.gl/.test(url)) {
       const r = await axios.get(url, {
@@ -134,18 +146,20 @@ app.get("/api/resolve", async (req, res) => {
       }
     }
 
-    // 3️⃣ coba parse dari URL hasil redirect
     coords = extractLatLngFromUrl(finalUrl);
-    if (coords) return res.json(coords);
+    if (coords) {
+      return res.json({ ...coords, name: null });
+    }
 
-    // 4️⃣ terakhir fetch HTML
     const response = await axios.get(finalUrl);
     coords = extractLatLngFromHtml(response.data);
+    const name = extractPlaceNameFromHtml(response.data);
+
     if (!coords) {
       return res.status(404).json({ error: "Coordinates not found" });
     }
 
-    res.json(coords);
+    res.json({ ...coords, name });
   } catch (err) {
     console.error(err.message);
     res.status(500).json({ error: "Failed to resolve URL" });
