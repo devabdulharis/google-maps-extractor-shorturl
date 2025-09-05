@@ -48,7 +48,7 @@ const swaggerOptions = {
       description:
         "API untuk extract latitude & longitude dari link Google Maps (shortlink & direct link).",
     },
-    servers: [{ url: "https://your-app.vercel.app" }],
+    servers: [{ url: "https://google-maps-extractor-shorturl.vercel.app" }],
   },
   apis: ["./server.js"], // kalau mau kasih JSDoc bisa otomatis masuk
 };
