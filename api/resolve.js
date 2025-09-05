@@ -19,12 +19,18 @@ function extractLatLngFromUrl(url) {
 }
 
 function extractLatLngFromHtml(html) {
-  const regex =
-    /window\.APP_INITIALIZATION_STATE=\[\[\[\d+.\d+,(-?\d+\.\d+),(-?\d+\.\d+)/;
-  const match = html.match(regex);
+  // 1️⃣ Cari pattern !3d..!4d..
+  let match = html.match(/!3d(-?\d+\.\d+)!4d(-?\d+\.\d+)/);
   if (match) {
     return { lat: parseFloat(match[1]), lng: parseFloat(match[2]) };
   }
+
+  // 2️⃣ Kalau gagal, coba APP_INITIALIZATION_STATE (fallback lama)
+  match = html.match(/window\.APP_INITIALIZATION_STATE=.*?(-?\d+\.\d+),(-?\d+\.\d+)/);
+  if (match) {
+    return { lat: parseFloat(match[1]), lng: parseFloat(match[2]) };
+  }
+
   return null;
 }
 
