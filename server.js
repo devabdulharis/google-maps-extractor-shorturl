@@ -11,15 +11,15 @@ const app = express();
 function extractLatLngFromUrl(url) {
   let match;
 
-  // Format: @lat,lng
+  // @lat,lng
   match = url.match(/@(-?\d+\.\d+),(-?\d+\.\d+)/);
   if (match) return { lat: parseFloat(match[1]), lng: parseFloat(match[2]) };
 
-  // Format: ?q=lat,lng
+  // ?q=lat,lng
   match = url.match(/[?&]q=(-?\d+\.\d+),(-?\d+\.\d+)/);
   if (match) return { lat: parseFloat(match[1]), lng: parseFloat(match[2]) };
 
-  // Format: !3dlat!4dlong
+  // !3dlat!4dlong
   match = url.match(/!3d(-?\d+\.\d+)!4d(-?\d+\.\d+)/);
   if (match) return { lat: parseFloat(match[1]), lng: parseFloat(match[2]) };
 
@@ -28,7 +28,7 @@ function extractLatLngFromUrl(url) {
 
 function extractLatLngFromHtml(html) {
   const regex =
-    /window\.APP_INITIALIZATION_STATE=\[\[\[\d+,\d+,".*?",(-?\d+\.\d+),(-?\d+\.\d+)/;
+    /window\.APP_INITIALIZATION_STATE=\[\[\[\d+.\d+,(-?\d+\.\d+),(-?\d+\.\d+)/;
   const match = html.match(regex);
   if (match) {
     return { lat: parseFloat(match[1]), lng: parseFloat(match[2]) };
