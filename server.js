@@ -46,10 +46,24 @@ function extractLatLngFromHtml(html) {
 // Fungsi helper untuk extract nama tempat / alamat
 // ====================================================
 function extractPlaceNameFromHtml(html) {
-  const match = html.match(/<title>(.*?)· Google Maps<\/title>/);
+  // Format umum: <title>Nama Tempat · Google Maps</title>
+  let match = html.match(/<title>(.*?)· Google Maps<\/title>/);
   if (match) {
     return match[1].trim();
   }
+
+  // Format lain: <title>Nama Tempat - Google Maps</title>
+  match = html.match(/<title>(.*?)- Google Maps<\/title>/);
+  if (match) {
+    return match[1].trim();
+  }
+
+  // Format fallback: <meta property="og:title" content="Nama Tempat" />
+  match = html.match(/<meta property="og:title" content="(.*?)"/);
+  if (match) {
+    return match[1].trim();
+  }
+
   return null;
 }
 
