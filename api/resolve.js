@@ -31,7 +31,7 @@ function extractPlaceInfoFromHtml(html) {
   let match = html.match(/<title>([^<]+)<\/title>/i);
   if (match) {
     // hapus suffix ' - Google Maps'
-    info.name = match[1].replace(/\s*-\s*Google Maps\s*$/i, "").trim();
+    info.name = match[1].trim();
   }
 
   // Ambil <meta content="..." property="og:description">
