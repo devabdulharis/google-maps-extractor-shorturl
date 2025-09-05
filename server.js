@@ -146,10 +146,10 @@ app.get("/api/resolve", async (req, res) => {
     }
 
     // coba extract koordinat langsung dari URL
-    let coords = extractLatLngFromUrl(finalUrl);
-    if (coords) {
-      return res.json({ ...coords, name: null });
-    }
+    // let coords = extractLatLngFromUrl(finalUrl);
+    // if (coords) {
+    //   return res.json({ ...coords, name: null });
+    // }
 
     // fetch HTML dari Google Maps
     const r = await axios.get(finalUrl, {
