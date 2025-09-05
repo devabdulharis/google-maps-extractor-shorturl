@@ -149,41 +149,44 @@ app.get("/api/resolve", async (req, res) => {
     return res.status(400).json({ error: "Missing url parameter" });
   }
 
-  try {
-    let coords = extractLatLngFromUrl(url);
-    if (coords) {
-      return res.json({ ...coords, name: null });
-    }
+  app.get("/api/resolve", async (req, res) => {
+    const { url } = req.query;
+    if (!url) return res.status(400).json({ error: "Missing url parameter" });
 
-    let finalUrl = url;
-    if (/goo\.gl|maps\.app\.goo\.gl/.test(url)) {
-      const r = await axios.get(url, {
-        maxRedirects: 0,
-        validateStatus: (s) => s >= 200 && s < 400,
-      });
-      if (r.headers.location) {
-        finalUrl = r.headers.location;
+    try {
+      let finalUrl = url;
+  
+      // follow redirect shortlink (maps.app.goo.gl)
+      if (/goo\.gl|maps\.app\.goo\.gl/.test(url)) {
+        const r = await axios.get(url, {
+          maxRedirects: 0,
+          validateStatus: (s) => s >= 200 && s < 400,
+        });
+        if (r.headers.location) {
+          finalUrl = r.headers.location;
+        }
       }
+  
+      // coba koordinat langsung dari URL
+      let coords = extractLatLngFromUrl(finalUrl);
+      if (coords) {
+        return res.json({ ...coords, name: null, description: null, image: null });
+      }
+  
+      // fetch HTML dari Google Maps
+      const response = await axios.get(finalUrl);
+      const info = extractInfoFromHtml(response.data);
+  
+      if (!info.lat || !info.lng) {
+        return res.status(404).json({ error: "Coordinates not found" });
+      }
+  
+      res.json(info);
+    } catch (err) {
+      console.error("Resolve error:", err.message);
+      res.status(500).json({ error: "Failed to resolve URL" });
     }
-
-    coords = extractLatLngFromUrl(finalUrl);
-    if (coords) {
-      return res.json({ ...coords, name: null });
-    }
-
-    const response = await axios.get(finalUrl);
-    coords = extractLatLngFromHtml(response.data);
-    const info = extractPlaceInfoFromHtml(response.data);
-
-    if (!coords) {
-      return res.status(404).json({ error: "Coordinates not found" });
-    }
-
-    res.json({ ...coords, info });
-  } catch (err) {
-    console.error(err.message);
-    res.status(500).json({ error: "Failed to resolve URL" });
-  }
+  });
 });
 
 // ====================================================
