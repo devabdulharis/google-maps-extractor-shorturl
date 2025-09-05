@@ -58,6 +58,7 @@ const swaggerOptions = {
   apis: [path.join(__dirname, "./server.js")], // aman untuk vercel
 };
 const swaggerSpec = swaggerJsdoc(swaggerOptions);
+console.log(JSON.stringify(swaggerSpec, null, 2));
 app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
 // ====================================================
