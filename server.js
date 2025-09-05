@@ -2,6 +2,8 @@ import express from "express";
 import axios from "axios";
 import swaggerUi from "swagger-ui-express";
 import swaggerJsdoc from "swagger-jsdoc";
+import path from "path";
+import { fileURLToPath } from "url";
 
 const app = express();
 
@@ -39,6 +41,9 @@ function extractLatLngFromHtml(html) {
 // ====================================================
 // Swagger Setup
 // ====================================================
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
 const swaggerOptions = {
   definition: {
     openapi: "3.0.3",
@@ -50,9 +55,8 @@ const swaggerOptions = {
     },
     servers: [{ url: "https://google-maps-extractor-shorturl.vercel.app" }],
   },
-  apis: ["./server.js"], // kalau mau kasih JSDoc bisa otomatis masuk
+  apis: [path.join(__dirname, "./server.js")], // aman untuk vercel
 };
-
 const swaggerSpec = swaggerJsdoc(swaggerOptions);
 app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
