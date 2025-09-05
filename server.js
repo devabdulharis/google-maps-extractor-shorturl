@@ -158,10 +158,17 @@ app.get("/api/resolve", async (req, res) => {
   
       // follow redirect shortlink (maps.app.goo.gl)
       if (/goo\.gl|maps\.app\.goo\.gl/.test(url)) {
-        const r = await axios.get(url, {
-          maxRedirects: 0,
-          validateStatus: (s) => s >= 200 && s < 400,
+        const r = await axios.get(finalUrl, {
+          timeout: 8000, // max 8 detik
+          headers: {
+            "User-Agent":
+              "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36",
+            Accept: "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+          },
+          responseType: "text", // jangan stream
+          maxRedirects: 5, // biar berhenti kalau looping redirect
         });
+
         if (r.headers.location) {
           finalUrl = r.headers.location;
         }
