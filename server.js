@@ -129,6 +129,11 @@ app.use(
  *                   example: "Kantor Desa Gumulung Lebak"
  */
 app.get("/api/resolve", async (req, res) => {
+  res.setHeader("Access-Control-Allow-Origin", "*");
+  res.setHeader("Access-Control-Allow-Methods", "GET,POST,PUT,DELETE,OPTIONS");
+  res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization");
+  next();
+  
   const { url } = req.query;
   if (!url) return res.status(400).json({ error: "Missing url parameter" });
 
